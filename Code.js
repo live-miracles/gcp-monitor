@@ -3,7 +3,7 @@ const props = PropertiesService.getScriptProperties();
 const GCLOUD_PROJECT_ID = props.getProperty('GCLOUD_PROJECT_ID');
 const SERVICE_ACCOUNT_KEY = props.getProperty('SERVICE_ACCOUNT_KEY');
 const RECIPIENT = props.getProperty('RECIPIENT');
-const TEST_RECIPIENT = props.getProperty('TEST_RECIPIENT');
+const CC = props.getProperty('CC');
 
 class Instance {
     constructor(id, name, hostname, startTime = -1, startedBy = '') {
@@ -168,8 +168,14 @@ function getSummeryEmail(running) {
         running.map((_) => _.reminderMessage).join('\n\n') +
         '\n\nPranam,\nGCP Monitoring Script';
     return {
+        recipient: RECIPIENT,
         subject: subject,
         body: body,
+        options: {
+            cc: CC,
+            name: 'GCP Monitoring',
+            noReply: true,
+        },
     };
 }
 
@@ -179,8 +185,7 @@ function sendReminderEmail() {
         console.log('No running instances.');
         return;
     }
-    const { subject, body } = getSummeryEmail(running);
+    const { recipient, subject, body, options } = getSummeryEmail(running);
     console.log(subject + '\n' + body);
-    MailApp.sendEmail(RECIPIENT, subject, body);
-    MailApp.sendEmail(TEST_RECIPIENT, subject, body);
+    MailApp.sendEmail(recipient, subject, body, options);
 }
